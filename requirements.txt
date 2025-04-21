@@ -1,0 +1,9 @@
+# requirements.txt
+Flask>=2.0
+python-dotenv>=0.19
+google-generativeai>=0.3   # For AI Studio
+google-cloud-aiplatform>=1.40.0 # For Vertex AI (check for latest)
+Pillow>=9.0
+waitress>=2.0 # For a production-grade WSGI server
+opencv-python-headless>=4.5
+numpy # Explicitly add numpy if needed by other parts or implicitly by opencv

@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{# Keep specific class for main content block #}
+{% block main_content_class %}index-page{% endblock %}
+
+{% block content %}
+
+{# === Traffic Light Section === #}
+{# Keep mb-3 for margin below this row, Keep g-3 for gutters #}
+<div class="row traffic-lights-row mb-3 g-3"> {# Removed mt-3 #}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Simulated Traffic Lights</span>
+                <div class="form-check form-switch ms-3 mode-toggle-container">
+                    <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
+                    <label class="form-check-label" for="modeToggle" id="modeToggleLabel">Timer Mode</label>
+                </div>
+            </div>
+            <div class="card-body d-flex justify-content-around align-items-center flex-wrap">
+                {# Direction A #}
+                <div class="text-center p-2 traffic-light-group" id="light-group-A">
+                    <div class="mb-1 fw-bold" id="direction-A-label">Direction A</div>
+                    <div class="traffic-light" id="light-A">
+                        <div class="light red" id="light-A-red"></div>
+                        <div class="light yellow" id="light-A-yellow"></div>
+                        <div class="light green" id="light-A-green"></div>
+                    </div>
+                    <div class="signal-timer mt-1" id="timer-A">0 Sec</div>
+                </div>
+                {# Direction B #}
+                <div class="text-center p-2 traffic-light-group" id="light-group-B">
+                    <div class="mb-1 fw-bold">Direction B</div>
+                    <div class="traffic-light" id="light-B">
+                        <div class="light red" id="light-B-red"></div>
+                        <div class="light yellow" id="light-B-yellow"></div>
+                        <div class="light green" id="light-B-green"></div>
+                    </div>
+                     <div class="signal-timer mt-1" id="timer-B">0 Sec</div>
+                </div>
+                {# Direction C #}
+                <div class="text-center p-2 traffic-light-group" id="light-group-C">
+                    <div class="mb-1 fw-bold">Direction C</div>
+                    <div class="traffic-light" id="light-C">
+                        <div class="light red" id="light-C-red"></div>
+                        <div class="light yellow" id="light-C-yellow"></div>
+                        <div class="light green" id="light-C-green"></div>
+                    </div>
+                     <div class="signal-timer mt-1" id="timer-C">0 Sec</div>
+                </div>
+                {# Direction D #}
+                <div class="text-center p-2 traffic-light-group" id="light-group-D">
+                    <div class="mb-1 fw-bold">Direction D</div>
+                    <div class="traffic-light" id="light-D">
+                        <div class="light red" id="light-D-red"></div>
+                        <div class="light yellow" id="light-D-yellow"></div>
+                        <div class="light green" id="light-D-green"></div>
+                    </div>
+                     <div class="signal-timer mt-1" id="timer-D">0 Sec</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{# === END Traffic Light Section === #}
+
+{# *** Wrapper DIV for AI Mode Sections *** #}
+{# This div is shown/hidden by JS based on the mode toggle #}
+<div id="ai-mode-sections" style="display: none;"> {# Initially hidden, JS changes display to flex #}
+    {# === Camera Feed, Results, and LLM Response Section === #}
+    {# Added g-3 for gutters, mb-3 for margin below row #}
+    {# Added align-items-stretch to make cards fill height equally #}
+    <div class="row g-3 mb-3 align-items-stretch">
+
+        {# Column for Camera Feed #}
+        <div class="col-lg-4 d-flex flex-column"> {# d-flex and flex-column needed for card height growth #}
+            <div class="card feed-card h-100 d-flex flex-column">
+                <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
+                    <span>Camera Feed (Live)</span>
+                </div>
+                <div class="card-body text-center p-0 d-flex justify-content-center align-items-center flex-grow-1" style="position: relative; overflow: hidden; background-color: #111;">
+                     <img id="cameraFeedImg" src="{{ url_for('video_feed') }}" alt="Live Camera Feed" style="max-width: 100%; max-height: 100%; height: auto; object-fit: contain;"
+                          onerror="this.onerror=null; this.parentElement.querySelector('#cameraError').style.display='block'; this.style.display='none';" />
+                     <p id="cameraError" class="text-danger bg-dark bg-opacity-75 p-2 rounded" style="position: absolute; display: none;">Error loading video stream from server.</p>
+                </div>
+                <div class="card-footer text-muted flex-shrink-0"> {# Footer doesn't grow #}
+                    Status: <span id="analysisStatus">Initializing...</span> | Mode: <span id="currentMode">?</span> @ <span id="currentRate">?</span>/min
+                    <span id="processError" class="text-danger float-end"></span>
+                </div>
+            </div>
+        </div>
+
+         {# Column for Analysis Results #}
+        <div class="col-lg-4 d-flex flex-column">
+             <div class="card results-card h-100 d-flex flex-column">
+                <div class="card-header flex-shrink-0">
+                    Traffic Analysis Results
+                     <span id="analysisSpinner" class="spinner-border spinner-border-sm float-end" role="status" aria-hidden="true" style="display: none;"></span>
+                </div>
+
+                <div class="card-body flex-grow-1" id="results" style="overflow-y: auto;">
+                    <p class="text-muted" id="resultsPlaceholder">Toggle to AI Mode for analysis.</p>
+                     <div id="analysisError" class="alert alert-danger" role="alert" style="display: none;"></div>
+                     <div id="analysisData" style="display: none;">
+                        <h5 class="card-title">Vehicles Present: <span id="vehiclesPresent" class="fw-bold">...</span></h5>
+                        <ul class="list-group list-group-flush">
+                             {# *** MODIFICATION: Grouped Label + Icon in a span, kept Count separate *** #}
+                             <li class="list-group-item d-flex justify-content-between align-items-center">
+                                 <span> {# Label + Icon Group #}
+                                     Cars
+                                     <i class="fas fa-car fa-fw text-primary ms-2 align-middle"></i> {# Added ms-2 for spacing #}
+                                 </span>
+                                 <span id="carCount" class="fw-bold text-primary">...</span> {# Count #}
+                             </li>
+                             <li class="list-group-item d-flex justify-content-between align-items-center">
+                                 <span>
+                                     Bikes
+                                     <i class="fas fa-bicycle fa-fw text-info ms-2 align-middle"></i>
+                                 </span>
+                                 <span id="bikeCount" class="fw-bold text-info">...</span>
+                             </li>
+                             <li class="list-group-item d-flex justify-content-between align-items-center">
+                                 <span>
+                                     Trucks
+                                     <i class="fas fa-truck fa-fw text-warning ms-2 align-middle"></i>
+                                 </span>
+                                 <span id="truckCount" class="fw-bold text-warning">...</span>
+                             </li>
+                             <li class="list-group-item d-flex justify-content-between align-items-center">
+                                 <span>
+                                     Buses
+                                     <i class="fas fa-bus fa-fw text-success ms-2 align-middle"></i>
+                                 </span>
+                                 <span id="busCount" class="fw-bold text-success">...</span>
+                             </li>
+                             <li class="list-group-item d-flex justify-content-between align-items-center">
+                                 <span>
+                                     Unknown
+                                     <i class="fas fa-question-circle fa-fw text-secondary ms-2 align-middle"></i>
+                                 </span>
+                                 <span id="unknownCount" class="fw-bold text-danger">...</span> {# Kept text-danger #}
+                             </li>
+                             {# *** END MODIFICATION *** #}
+                        </ul>
+                    </div>
+                </div>
+                 <div class="card-footer text-muted flex-shrink-0"> Last update: <span id="lastUpdateTimestamp">Never</span> </div>
+            </div>
+        </div>
+
+        {# Column for Gemini API Call Logs #}
+        <div class="col-lg-4 d-flex flex-column">
+            <div class="card llm-response-card h-100 d-flex flex-column">
+                <div class="card-header flex-shrink-0">
+                    Gemini API Call Logs
+                </div>
+                <div class="card-body llm-log-card-body flex-grow-1" style="overflow-y: auto;">
+                    <p class="text-muted" id="llmResponsePlaceholder">Toggle to AI Mode to see LLM activity.</p>
+                    <div id="llmLogContainer" class="log-container"></div> {# Container for log messages #}
+                </div>
+                <div class="card-footer text-muted flex-shrink-0">
+                    LLM inference Time: <span id="llmApiDuration">N/A</span>
+                </div>
+            </div>
+        </div>{# End LLM Column #}
+
+    </div> {# End of row.g-3.mb-3.align-items-stretch #}
+</div> {# End of #ai-mode-sections #}
+{# *** END WRAPPER DIV *** #}
+
+{% endblock %} {# End of block content #}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %} {# End of block scripts #}

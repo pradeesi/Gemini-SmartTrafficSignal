@@ -1,0 +1,387 @@
+/* static/css/style.css */
+
+/* --- Theme Variables (Light Theme Defaults) --- */
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --card-border: rgba(0, 0, 0, 0.175);
+    --navbar-bg: #e9ecef; /* Light navbar bg */
+    --navbar-text: #000;   /* Light navbar text */
+    --footer-bg: #e9ecef;  /* Default footer bg (will be overridden) */
+    --footer-text: #000;   /* Default footer text (will be overridden) */
+    --link-color: #0d6efd;
+    --link-hover-color: #0a58ca;
+    --muted-text: #6c757d;
+    --form-bg: #fff;
+    --form-border: #ced4da;
+    --bs-danger: #dc3545;
+    --bs-success: #198754; /* Bootstrap Success Green */
+    --bs-info: #0dcaf0; /* Bootstrap Info Blue/Cyan */
+    --bs-warning: #ffc107; /* Bootstrap Amber/Yellow */
+    --bs-body-bg: var(--bg-color);
+    --bs-body-color: var(--text-color);
+    --bs-secondary-color: rgba(var(--text-color-rgb), 0.75);
+    --bs-body-secondary-color: rgba(var(--text-color-rgb), 0.75);
+    --bs-border-color: var(--form-border);
+    --text-color-rgb: 33, 37, 41; /* RGB for #212529 */
+    --bs-gutter-y: 1rem; /* Define fallback for variable */
+    --bs-card-border-radius: 0.375rem; /* Default Bootstrap card radius */
+
+    /* Log colors */
+    --log-info-color: var(--muted-text);
+    --log-error-color: var(--bs-danger);
+    --log-response-color: var(--text-color); /* Default text color for response */
+    --log-timestamp-color: #999;
+
+
+    /* Define Halo colors */
+    --halo-green-color-rgba: 25, 135, 84; /* --bs-success */
+    --halo-red-color-rgba: 220, 53, 69;  /* --bs-danger */
+    --halo-amber-color-rgba: 255, 193, 7; /* --bs-warning */
+}
+
+/* --- Dark Theme Overrides --- */
+[data-theme="dark"] {
+    --bg-color: #212529;
+    --text-color: #f8f9fa;
+    --card-bg: #343a40;
+    --card-border: rgba(255, 255, 255, 0.125);
+    --navbar-bg: #343a40;  /* Dark navbar bg */
+    --navbar-text: #fff;    /* Dark navbar text */
+    --footer-bg: #343a40;   /* Default footer bg (will be overridden) */
+    --footer-text: #fff;    /* Default footer text (will be overridden) */
+    --link-color: #6ea8fe;
+    --link-hover-color: #8bb9fe;
+    --muted-text: #adb5bd; /* Lighter grey for dark mode */
+    --form-bg: #495057;
+    --form-border: #6c757d;
+    --bs-body-color: var(--text-color);
+    --bs-secondary-color: var(--muted-text);
+    --bs-body-secondary-color: var(--muted-text);
+    --bs-border-color: var(--card-border);
+    --text-color-rgb: 248, 249, 250; /* RGB for #f8f9fa */
+
+    /* Specific dark theme overrides */
+     .card-header, .card-footer:not(.footer) { /* Exclude main footer */ background-color: rgba(255, 255, 255, 0.05); border-color: var(--card-border); }
+     .list-group-item { background-color: var(--card-bg); border-color: var(--card-border); color: var(--text-color); }
+     .form-control, .form-select { background-color: var(--form-bg); border-color: var(--form-border); color: var(--text-color); }
+     .form-control::placeholder { color: var(--muted-text); }
+     .form-control:disabled, .form-control[readonly] { background-color: #495057; opacity: 0.65; }
+     .camera-controlled-light { background-color: rgba(13, 202, 240, 0.15); }
+     .ai-mode-highlight { background-color: rgba(25, 135, 84, 0.15); }
+     .form-text { color: var(--muted-text); }
+     #llmResponseText { color: var(--text-color); } /* Ensure pre text color is right in dark mode */
+
+     /* Dark theme log colors */
+     --log-info-color: var(--muted-text);
+     --log-error-color: #ff7b8a; /* Lighter red for dark mode */
+     --log-response-color: var(--text-color);
+     --log-timestamp-color: #777;
+}
+
+
+/* --- General Layout Styles --- */
+html { height: 100%; }
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding-top: 48px; /* Adjust this value based on actual navbar height (approx 3rem) */
+    margin: 0;
+    overflow: hidden; /* Default: prevent body scroll */
+}
+main.container-fluid {
+    flex: 1 1 auto; /* Grow to fill space */
+    /* Default: Hide overflow */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+/* *** ADDED: Allow main container to scroll ONLY on settings page *** */
+main.container-fluid.settings-page {
+    overflow-y: auto; /* Enable vertical scroll */
+    overflow-x: hidden; /* Disable horizontal scroll */
+}
+
+.footer {
+    background-color: var(--navbar-bg); /* Match navbar background */
+    color: var(--navbar-text);         /* Match navbar text color */
+    flex-shrink: 0; /* Prevent footer from shrinking */
+    width: 100%;
+    padding-top: 0.5rem;  /* Reduced padding (py-2 in bootstrap) */
+    padding-bottom: 0.5rem; /* Reduced padding (py-2 in bootstrap) */
+    text-align: center;
+}
+
+/* --- Index Page Layout --- */
+main > .traffic-lights-row {
+    flex-shrink: 0; /* Prevent the traffic lights row from shrinking */
+}
+
+main > #ai-mode-sections {
+    flex: 1 1 auto; /* Allow this section to grow and shrink */
+    overflow: hidden; /* Prevent this section from overflowing main */
+    display: flex;
+    flex-direction: column;
+}
+
+main > #ai-mode-sections > .row {
+     flex-wrap: wrap;
+     overflow: hidden;
+     flex-grow: 1;
+     /* align-items-stretch is set in HTML */
+     min-height: 250px; /* Help prevent collapse */
+}
+
+main > #ai-mode-sections > .row > [class^="col-"] {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Component Styles (Base) --- */
+.navbar {
+    background-color: var(--navbar-bg) !important;
+}
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    display: flex; /* Card itself is a flex container */
+    flex-direction: column; /* Stack header/body/footer vertically */
+    overflow: hidden; /* Prevent content spilling from card */
+    border-radius: var(--bs-card-border-radius) !important;
+    flex-grow: 1; /* Allow card to grow to fill column height */
+    min-height: 150px;
+}
+.card-header, .card-footer:not(.footer) {
+     color: var(--text-color);
+     background-color: rgba(0, 0, 0, 0.05);
+     border-color: var(--card-border);
+     flex-shrink: 0; /* Prevent header/footer from shrinking */
+}
+.card-footer:not(.footer) {
+    border-top: 1px solid var(--card-border);
+    border-bottom-left-radius: var(--bs-card-border-radius) !important;
+    border-bottom-right-radius: var(--bs-card-border-radius) !important;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+.card-header {
+    border-bottom: none;
+    border-top-left-radius: var(--bs-card-border-radius) !important;
+    border-top-right-radius: var(--bs-card-border-radius) !important;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.list-group-item { background-color: var(--card-bg); border-color: var(--card-border); color: var(--text-color); }
+.form-control, .form-select { background-color: var(--form-bg); border-color: var(--form-border); color: var(--text-color); }
+.form-control::placeholder { color: var(--muted-text); opacity: 0.8; }
+.form-control:disabled, .form-control[readonly] { background-color: #e9ecef; opacity: 0.65; }
+.form-text { color: var(--muted-text); }
+.card-body {
+    flex: 1 1 auto; /* Allow body to grow/shrink */
+    overflow: hidden; /* Hide overflow BY DEFAULT */
+    border-radius: 0;
+    /* *** ADDED min-height: 0; *** */
+    /* Allow flex item to shrink below intrinsic content size */
+    min-height: 0;
+    padding: 1rem 1rem; /* Default padding */
+    position: relative; /* Default context for potential absolute children */
+    /* Removed display flex/column from general rule */
+}
+
+
+/* --- Navbar Internal Element Height Adjustments --- */
+.navbar .navbar-brand {
+    color: var(--navbar-text) !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    margin-bottom: 0 !important;
+    line-height: 1.2 !important;
+}
+
+.navbar .navbar-nav .nav-link {
+    color: var(--navbar-text) !important;
+    opacity: 0.75;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    line-height: 1.2 !important;
+}
+.navbar .navbar-nav .nav-link:hover,
+.navbar .navbar-nav .nav-link.active {
+    opacity: 1;
+}
+
+.navbar .btn {
+    padding-top: 0.2rem !important;
+    padding-bottom: 0.2rem !important;
+    line-height: 1 !important;
+}
+
+.navbar .navbar-toggler {
+    padding-top: 0.2rem !important;
+    padding-bottom: 0.2rem !important;
+    line-height: 1 !important;
+}
+
+.navbar .navbar-nav {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+/* --- End Navbar Height Adjustments --- */
+
+
+/* --- Specific UI Element Styles --- */
+
+/* Camera Feed Card Body */
+.feed-card .card-body {
+    padding: 0 !important;
+    overflow: hidden !important; /* Explicitly hide overflow */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: static; /* Ensure it doesn't become a positioning context */
+    min-height: 0; /* Allow shrinking */
+}
+
+#cameraFeedImg, #settingsFeedImg {
+    background-color: #000;
+    display: block;
+    /* max-width/max-height/object-fit handled inline */
+}
+#cropContainer {
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+    background-color: #111;
+}
+#cropOverlay {
+    position: absolute;
+    border: 2px dashed #0d6efd;
+    box-sizing: border-box;
+    cursor: grab;
+    z-index: 10;
+    background-color: rgba(13, 110, 253, 0.1);
+}
+#cropOverlay:active { cursor: grabbing; }
+.spinner-border { width: 2rem; height: 2rem; }
+.spinner-border-sm { width: 1rem; height: 1rem; border-width: 0.2em; }
+
+/* Analysis Results Card Body */
+#results.card-body {
+    /* Override general overflow:hidden to allow scrolling */
+    overflow-y: auto;
+    position: static; /* Override relative position if inherited */
+    padding: 1rem 1rem; /* Ensure padding */
+    min-height: 0; /* Allow shrinking */
+}
+
+
+/* --- LLM Log Styles --- */
+/* LLM Card Body - positioning context, zero padding */
+.llm-log-card-body {
+    padding: 0 !important;
+    position: relative; /* Context for absolute child */
+    overflow: hidden; /* Clip absolute child */
+    min-height: 0; /* Allow shrinking */
+    /* No display:flex needed here if child is absolute */
+}
+/* Placeholder needs to be positioned or handled by JS */
+#llmResponsePlaceholder {
+    color: var(--muted-text);
+    padding: 1rem;
+    text-align: center;
+    /* Position it absolutely or ensure JS hides it effectively */
+    position: absolute; /* Position relative to card-body */
+    top: 0; left: 0; right: 0; bottom: 0; /* Center it (approx) */
+    display: flex; /* Use flex to center text vertically */
+    align-items: center;
+    justify-content: center;
+    z-index: 1; /* Behind log container */
+}
+
+/* Log Container - Positioned absolutely, scrolls */
+.log-container {
+    font-family: monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    /* *** CHANGED: Absolute positioning *** */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: auto; /* Enable scroll */
+    padding: 0.5rem; /* Padding inside */
+    color: var(--text-color);
+    scroll-behavior: smooth;
+    z-index: 2; /* Above placeholder */
+    /* Remove flex-grow, not needed for absolute */
+    /* Remove min-height, may not be needed */
+}
+
+/* Individual log entries */
+.log-entry {
+    margin-bottom: 0.3rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.log-timestamp {
+    color: var(--log-timestamp-color);
+    margin-right: 0.3em;
+}
+.log-entry-info {
+    color: var(--log-info-color);
+}
+.log-entry-error {
+    color: var(--log-error-color);
+    font-weight: bold;
+}
+.log-entry-response {
+    color: var(--log-response-color);
+}
+
+
+/* --- Settings Page Specific Styles --- */
+/* Enable scrolling for settings page main container via class */
+/* main.container-fluid.settings-page defined earlier */
+/* REMOVED #settings-form-card-body { overflow-y: auto; } */
+
+
+/* --- Traffic Light Styles --- */
+/* ... (Traffic light styles remain unchanged) ... */
+.traffic-light-group { min-width: 80px; border-radius: 0.5rem; padding: 0.5rem; background-color: transparent; transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.5s ease; border: 2px solid transparent; vertical-align: top; display: inline-flex; flex-direction: column; align-items: center; margin-bottom: 0.5rem; }
+.traffic-light { background-color: #1a1a1a; border-radius: 8px; padding: 10px 8px; border: 1px solid #444; margin-bottom: 0.25rem; }
+.traffic-light .light { width: 25px; height: 25px; border-radius: 50%; background-color: #4d4d4d; margin: 5px auto; opacity: 0.3; transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+.traffic-light .light.red.active { background-color: var(--bs-danger); opacity: 1; box-shadow: 0 0 10px var(--bs-danger); }
+.traffic-light .light.yellow.active { background-color: var(--bs-warning); opacity: 1; box-shadow: 0 0 10px var(--bs-warning); }
+.traffic-light .light.green.active { background-color: var(--bs-success); opacity: 1; box-shadow: 0 0 10px var(--bs-success); }
+.signal-timer { min-height: 1.5em; line-height: 1.2em; min-width: 55px; text-align: center; padding: 2px 0; color: var(--muted-text); font-weight: 500; }
+
+/* --- Highlight Box Styles (Applied to .traffic-light-group) --- */
+.camera-controlled-light, .ai-mode-highlight {}
+.camera-controlled-light { border-color: var(--bs-info); background-color: rgba(13, 202, 240, 0.1); }
+.ai-mode-highlight { border-color: var(--bs-success); background-color: rgba(25, 135, 84, 0.1); }
+
+
+/* --- Halo Effect Styles (Applied to .traffic-light-group) --- */
+/* ... (Halo styles remain unchanged) ... */
+@keyframes haloPulse-green { 0% { box-shadow: 0 0 12px 4px rgba(var(--halo-green-color-rgba), 0.6); } 50% { box-shadow: 0 0 18px 7px rgba(var(--halo-green-color-rgba), 0.8); } 100% { box-shadow: 0 0 12px 4px rgba(var(--halo-green-color-rgba), 0.6); } }
+@keyframes haloPulse-red { 0% { box-shadow: 0 0 12px 4px rgba(var(--halo-red-color-rgba), 0.6); } 50% { box-shadow: 0 0 18px 7px rgba(var(--halo-red-color-rgba), 0.8); } 100% { box-shadow: 0 0 12px 4px rgba(var(--halo-red-color-rgba), 0.6); } }
+@keyframes haloPulse-amber { 0% { box-shadow: 0 0 12px 4px rgba(var(--halo-amber-color-rgba), 0.6); } 50% { box-shadow: 0 0 18px 7px rgba(var(--halo-amber-color-rgba), 0.8); } 100% { box-shadow: 0 0 12px 4px rgba(var(--halo-amber-color-rgba), 0.6); } }
+.ai-halo-effect--green, .ai-halo-effect--red, .ai-halo-effect--amber { border-radius: 0.5rem; animation-duration: 2s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+.ai-halo-effect--green { animation-name: haloPulse-green; box-shadow: 0 0 15px 5px rgba(var(--halo-green-color-rgba), 0.7); }
+.ai-halo-effect--red { animation-name: haloPulse-red; box-shadow: 0 0 15px 5px rgba(var(--halo-red-color-rgba), 0.7); }
+.ai-halo-effect--amber { animation-name: haloPulse-amber; box-shadow: 0 0 15px 5px rgba(var(--halo-amber-color-rgba), 0.7); }
+
+
+/* --- Mode Toggle Styles --- */
+/* ... (Mode toggle styles remain unchanged) ... */
+.mode-toggle-container { min-width: 120px; display: inline-flex; align-items: center; justify-content: flex-end; }
+.mode-toggle-container .form-check-label { margin-right: 0.5rem; order: 1; white-space: nowrap; }
+.mode-toggle-container .form-check-input { order: 2; margin-left: 0 !important; }

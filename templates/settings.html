@@ -1,0 +1,133 @@
+{% extends 'base.html' %} {# Make sure base template is correctly linked #}
+
+{# *** ADDED: Add specific class for this page's main element *** #}
+{% block main_content_class %}settings-page{% endblock %}
+
+{% block content %} {# Content block starts here #}
+
+<div class="row g-4"> {# Row starts HERE, wraps BOTH columns #}
+
+    <div class="col-lg-6"> {# Left column for settings form #}
+        {# *** REMOVED h-100 to allow natural height based on content *** #}
+        <div class="card"> {# Card styling #}
+            <div class="card-header">Configuration</div>
+            {# Removed ID from card-body as page-level scroll is used now #}
+            <div class="card-body">
+                {# H2 and P are correctly placed inside card body #}
+                <h2>Application Settings {% if not is_camera_running %}<span class="badge bg-warning text-dark ms-2">Camera Stopped</span>{% endif %}</h2>
+                <p>Configure analysis parameters, signal timings, and select the analysis area.</p>
+
+                {# --- FORM SECTION --- #}
+                <form id="settingsForm">
+                    {# Operation Mode Setting #}
+                    <div class="mb-3">
+                        <label for="modeSelect" class="form-label">Operation Mode</label>
+                        <select class="form-select" id="modeSelect" aria-label="Operation Mode">
+                            <option value="Image">Image Mode</option>
+                            <option value="Video">Video Mode</option>
+                        </select>
+                         <div class="form-text">Selects operational mode (Currently mainly informational). API calls are rate-limited below.</div>
+                    </div>
+
+                    {# API Rate Limit Setting #}
+                    <div class="mb-3">
+                        <label for="apiCallsPerMinuteInput" class="form-label">Max API Calls per Minute</label>
+                        <input type="number" class="form-control" id="apiCallsPerMinuteInput" value="6" min="1" max="60" step="1">
+                        <div class="form-text">Limits how often the AI analysis API is called (1-60). Helps manage API quota.</div>
+                    </div>
+
+                    {# Capture Resolution Setting #}
+                    <div class="mb-3">
+                        <label for="resolutionSelect" class="form-label">Capture Resolution</label>
+                        <select class="form-select" id="resolutionSelect" aria-label="Capture Resolution">
+                            <option value="default">Backend Default</option>
+                            <option value="640x480">Low (640x480)</option>
+                            <option value="1280x720">Medium (1280x720)</option>
+                            {-- <option value="1920x1080">High (1920x1080)</option> --} {# Optional #}
+                        </select>
+                         <div class="form-text">Lower resolution reduces cost/latency. Higher improves quality. Backend will attempt to set.</div>
+                    </div>
+
+                    {# Timer Signal Settings #}
+                    <h5 class="mt-4">Signal Timings</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="greenDurationInput" class="form-label">Green Light Duration (Seconds)</label>
+                            <input type="number" class="form-control" id="greenDurationInput" value="3" min="1" max="60" step="1">
+                            <div class="form-text">Duration for Green signal in Timer Mode (Directions B, C, D).</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="yellowDurationInput" class="form-label">Yellow Light Duration (Seconds)</label>
+                            <input type="number" class="form-control" id="yellowDurationInput" value="1" min="1" max="5" step="1">
+                            <div class="form-text">Duration for Yellow signal (All Directions).</div>
+                        </div>
+                    </div>
+                     {# *** START: Added Max Time for Smart Direction A *** #}
+                     <div class="mb-3">
+                        <label for="maxTimeSmartAInput" class="form-label">Max Time for Smart Direction A (Seconds)</label>
+                        <input type="number" class="form-control" id="maxTimeSmartAInput" value="10" min="5" max="300" step="1">
+                        <div class="form-text">Maximum duration Direction A stays green in AI Mode, even if vehicles are detected (5-300 seconds).</div>
+                    </div>
+                    {# *** END: Added Max Time for Smart Direction A *** #}
+
+
+                    {# Hidden Inputs for Crop Area Coordinates #}
+                    <input type="hidden" id="cropX" value="0.0">
+                    <input type="hidden" id="cropY" value="0.0">
+                    <input type="hidden" id="cropW" value="1.0">
+                    <input type="hidden" id="cropH" value="1.0">
+
+                    {# Save Button and Status Message Area #}
+                     {# *** Added mb-3 for margin below button *** #}
+                    <button type="submit" class="btn btn-primary mt-3 mb-3">Save Settings</button>
+                    <span id="saveStatus" class="ms-2"></span>
+                </form>
+                 {# --- END OF FORM SECTION --- #}
+            </div> {# End of card-body #}
+        </div> {# End of card #}
+    </div> {# End of col-lg-6 #}
+
+    {# *** REMOVED h-100 to allow natural height *** #}
+    <div class="col-lg-6"> {# Right column for cropping UI #}
+        <div class="card">
+             <div class="card-header">Select Analysis Area (Cropping)</div>
+            <div class="card-body text-center p-0 d-flex justify-content-center align-items-center {% if not is_camera_running %}disabled-overlay{% endif %}"
+                 style="position: relative; overflow: hidden; min-height: 300px; background-color: #111;"
+                 id="cropContainer">
+
+                {# === Point src to the FULL video feed endpoint === #}
+                <img id="settingsFeedImg" src="{{ url_for('video_feed_full') }}" alt="Live Feed for Cropping"
+                     style="display: block; max-width: 100%; max-height: 400px; height: auto; {% if not is_camera_running %} opacity: 0.6; cursor: not-allowed; {% else %} cursor: crosshair; {% endif %}"
+                     onerror="this.onerror=null; this.parentElement.querySelector('#settingsCameraError').style.display='block'; this.style.display='none';"
+                />
+                {# ======================================================== #}
+
+                <div id="cropOverlay" {% if not is_camera_running %} style="cursor: not-allowed; border-style: solid; border-color: #6c757d;" {% endif %}></div>
+                <p id="settingsCameraError" class="text-danger bg-dark bg-opacity-75 p-2 rounded" style="position: absolute; display: none;">Error loading video stream.</p>
+                {% if not is_camera_running %}
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(50,50,50,0.5); display: flex; justify-content: center; align-items: center; color: white; z-index: 15;">
+                    <p class="m-0">Camera is stopped. Start on main page to enable cropping.</p>
+                </div>
+                {% endif %}
+            </div> {# End of card-body #}
+            <div class="card-footer text-muted">
+                {% if is_camera_running %}
+                Click and drag on the video feed above to select the region for analysis. Save settings to apply.
+                {% else %}
+                Start the camera process on the main page to enable cropping.
+                {% endif %}
+            </div>
+        </div> {# End of card #}
+    </div> {# End of col-lg-6 #}
+
+</div> {# End of row g-4 #}
+
+{% endblock %} {# End of content block #}
+
+{% block scripts %} {# Start of scripts block #}
+<script>
+    // Pass Python bool to JS, ensuring it's treated as a boolean
+    const IS_CAMERA_RUNNING = {{ is_camera_running | tojson | safe }};
+</script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %} {# End of scripts block #}
